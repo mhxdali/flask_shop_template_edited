@@ -1,0 +1,37 @@
+services:
+  mysql: 
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password 
+      MYSQL_DATABASE: flask_shop
+
+    volumes:
+      - flask-shop-mysql-data:/var/lib/mysql 
+    networks:
+      - flask-shop-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 
+
+
+  flask:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: mysql+pymysql://root:root_password@mysqL:3306/flask_shop
+    networks:
+      - flask-shop-network
+    depends_on:
+      mysql:
+        condition: service_healthy 
+ 
+volumes:
+   flask-shop-mysql-data:
+networks:
+   flask-shop-network:
+     driver: bridge
+
+
